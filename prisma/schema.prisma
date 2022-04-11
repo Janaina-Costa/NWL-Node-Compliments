@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Users {
+  user_id   String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  admin     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@map("users")
+  compliments_user_sender Compliments[] @relation("compliments_user_sender")
+  compliments_user_receiver Compliments[] @relation("compliments_user_receiver")
+}
+
+model Tags {
+  tag_id    String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tags")
+  Compliments Compliments[]
+}
+
+model Compliments {
+  compli_id String   @id @default(uuid())
+  message   String
+  createdAt DateTime @default(now())
+
+  user_sender  String
+  FkUserSender Users  @relation("compliments_user_sender",fields: [user_sender], references: [user_id], onDelete: SetNull, onUpdate: SetNull)
+
+  user_receiver  String
+  FkUserReceiver Users  @relation("compliments_user_receiver",fields: [user_receiver], references: [user_id], onDelete: SetNull, onUpdate: SetNull)
+
+  tag_refer String
+  FkTag     Tags   @relation(fields: [tag_refer], references: [tag_id], onDelete: SetNull, onUpdate: SetNull)
+
+}
